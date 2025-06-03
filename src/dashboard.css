@@ -1,0 +1,208 @@
+.dashboard-container {
+  max-width: 900px;
+  margin: 3rem auto;
+  padding: 1rem;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #333;
+}
+
+.dashboard-container h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.totals {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  justify-content: center;
+}
+
+.total-box {
+  flex: 1;
+  background: #f7f7f7;
+  padding: 1rem;
+  border-radius: 8px;
+  text-align: center;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+}
+
+.total-box p {
+  margin: 0;
+}
+
+.total-box p:first-child {
+  text-transform: uppercase;
+  font-weight: 600;
+  color: #777;
+  margin-bottom: 0.5rem;
+}
+
+.total-number {
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.total-in .total-number {
+  color: #2d7a2d; /* green */
+}
+
+.total-out .total-number {
+  color: #a33a3a; /* red */
+}
+
+.table-wrapper {
+  overflow-x: auto;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.inventory-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 600px;
+  background: white;
+}
+
+.inventory-table thead {
+  background: #f0f0f0;
+  border-bottom: 2px solid #ddd;
+}
+
+.inventory-table th, 
+.inventory-table td {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+  vertical-align: middle;
+}
+
+.inventory-table tbody tr:hover {
+  background: #f9f9f9;
+}
+
+.type-in {
+  color: #2d7a2d;
+  font-weight: 700;
+}
+
+.type-out {
+  color: #a33a3a;
+  font-weight: 700;
+}
+
+.inventory-table input,
+.inventory-table select {
+  padding: 0.3rem 0.5rem;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  font-size: 0.9rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.btn {
+  border: none;
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  margin-right: 0.3rem;
+  transition: background-color 0.3s ease;
+}
+
+.btn.pdf-btn {
+  background-color: #007bff;
+  color: white;
+  padding: 8px 16px;
+  border: none;
+  margin: 15px 0;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.btn.edit {
+  background-color: #f0ad4e;
+  color: white;
+}
+
+.btn.edit:hover {
+  background-color: #ec971f;
+}
+
+.btn.delete {
+  background-color: #d9534f;
+  color: white;
+}
+
+.btn.delete:hover {
+  background-color: #c9302c;
+}
+
+.btn.save {
+  background-color: #5cb85c;
+  color: white;
+}
+
+.btn.save:hover {
+  background-color: #4cae4c;
+}
+
+.btn.cancel {
+  background-color: #6c757d;
+  color: white;
+}
+
+.btn.cancel:hover {
+  background-color: #5a6268;
+}
+
+.filters {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background-color: #f5f5f5;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.filters label {
+  display: flex;
+  flex-direction: column;
+  font-weight: 500;
+  font-size: 14px;
+  color: #333;
+}
+
+.filters select,
+.filters input {
+  margin-top: 0.3rem;
+  padding: 0.5rem 0.8rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+  min-width: 120px;
+  transition: border 0.2s ease;
+}
+
+.filters select:focus,
+.filters input:focus {
+  border-color: #007bff;
+  outline: none;
+}
+
+@media (max-width: 600px) {
+  .filters {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filters label {
+    width: 100%;
+  }
+}
