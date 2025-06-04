@@ -206,3 +206,35 @@
     width: 100%;
   }
 }
+
+.excel-btn {
+  background-color: #2d8f2d;
+  color: white;
+  margin-left: 10px;
+  padding: 8px 12px;
+  border: none;
+  margin-bottom: 15px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.pagination {
+  margin-top: 15px;
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
+.page-btn {
+  padding: 6px 12px;
+  border: 1px solid #007bff;
+  background-color: white;
+  color: #007bff;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.page-btn.active {
+  background-color: #007bff;
+  color: white;
+}

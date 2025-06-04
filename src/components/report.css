@@ -1,0 +1,121 @@
+.report-container {
+  max-width: 900px;
+  margin: 20px auto;
+  padding: 20px;
+  background-color: #fafafa;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #333;
+}
+
+.report-container h2 {
+  margin-bottom: 20px;
+  font-weight: 600;
+  color: #222;
+  text-align: center;
+}
+
+.report-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+.report-table th,
+.report-table td {
+  padding: 12px 15px;
+  border: 1px solid #ddd;
+  text-align: left;
+}
+
+.report-table th {
+  background-color: #007BFF;
+  color: white;
+  font-weight: 600;
+}
+
+.report-table tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.report-buttons {
+  margin-top: 20px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.btn:hover {
+  background-color: #0056b3;
+}
+
+.message {
+  margin-top: 15px;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.message.success {
+  color: green;
+}
+
+.message.error {
+  color: red;
+}
+
+.pdf-btn {
+  background-color: #007bff;
+  color: white;
+  padding: 8px 16px;
+  border: none;
+  margin: 15px 0;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.btn.edit {
+  background-color: #f0ad4e;
+  color: white;
+}
+
+.btn.edit:hover {
+  background-color: #ec971f;
+}
+
+.btn.delete {
+  background-color: #d9534f;
+  color: white;
+}
+
+.btn.delete:hover {
+  background-color: #c9302c;
+}
+
+.btn.save {
+  background-color: #5cb85c;
+  color: white;
+}
+
+.btn.save:hover {
+  background-color: #4cae4c;
+}
+
+.btn.cancel {
+  background-color: #6c757d;
+  color: white;
+}
+
+.btn.cancel:hover {
+  background-color: #5a6268;
+}
+
+.excel-btn {
+  background-color: #007bff;
+  color: white;
+  padding: 8px 16px;
+  border: none;
+  margin: 15px 0;
+  cursor: pointer;
+  border-radius: 5px;
+}

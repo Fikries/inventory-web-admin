@@ -1,19 +1,18 @@
 .stockform-container {
-  max-width: 400px;
+  max-width: 600px;
   margin: 2rem auto;
-  padding: 1.5rem;
+  padding: 1rem 2rem;
   background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 3px 8px rgba(0,0,0,0.1);
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  color: #333;
+  border-radius: 10px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
 }
 
 .stockform-container h2 {
-  font-size: 1.5rem;
-  font-weight: 600;
-  margin-bottom: 1.2rem;
   text-align: center;
+  margin-bottom: 1rem;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #333;
 }
 
 .stockform-form {
@@ -23,52 +22,63 @@
 }
 
 .input-field {
-  padding: 0.75rem 1rem;
+  padding: 0.6rem 1rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
   font-size: 1rem;
-  border: 1.5px solid #ccc;
-  border-radius: 8px;
-  outline: none;
-  transition: border-color 0.3s ease;
-  width: 100%;
   box-sizing: border-box;
 }
 
-.input-field:focus {
-  border-color: #2563eb; /* blue */
-  box-shadow: 0 0 5px rgba(37, 99, 235, 0.5);
+.textarea {
+  resize: vertical;
 }
 
-.btn-submit {
-  background-color: #2563eb;
+.form-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.submit-btn {
+  background-color: #28a745; /* Bootstrap green */
   color: white;
-  font-size: 1.1rem;
-  font-weight: 600;
-  padding: 0.75rem 1rem;
   border: none;
-  border-radius: 8px;
+  padding: 0.6rem 1.2rem;
+  font-size: 0.95rem;
+  border-radius: 6px;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: 0.3s ease;
 }
 
-.btn-submit:hover:not(:disabled) {
-  background-color: #1d4ed8;
+.submit-btn:hover {
+  background-color: #218838; /* Darker green on hover */
 }
 
-.btn-submit:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
+.clear-btn {
+  background-color: #6c757d;
+  color: white;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  font-size: 0.95rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+
+.clear-btn:hover {
+  background-color: #5a6268;
 }
 
 .message {
-  margin-top: 1rem;
-  font-weight: 600;
   text-align: center;
+  font-weight: bold;
+  margin-top: 1rem;
 }
 
 .success {
-  color: #16a34a; /* green */
+  color: #2d7a2d;
 }
 
 .error {
-  color: #dc2626; /* red */
+  color: #a33a3a;
 }

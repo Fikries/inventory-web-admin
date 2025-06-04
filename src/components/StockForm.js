@@ -7,6 +7,8 @@ const StockForm = () => {
   const [item, setItem] = useState('');
   const [qty, setQty] = useState('');
   const [type, setType] = useState('IN');
+  const [category, setCategory] = useState('');
+  const [remarks, setRemarks] = useState('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
 
@@ -19,16 +21,30 @@ const StockForm = () => {
         item,
         qty: Number(qty),
         type,
+        category,
+        remarks,
         date: Timestamp.now()
       });
       setMessage('✅ Stock added successfully!');
       setItem('');
       setQty('');
+      setType('IN');
+      setCategory('');
+      setRemarks('');
     } catch (error) {
       console.error("Error adding document: ", error);
       setMessage('❌ Failed to add stock.');
     }
     setLoading(false);
+  };
+
+  const handleClear = () => {
+    setItem('');
+    setQty('');
+    setType('IN');
+    setCategory('');
+    setRemarks('');
+    setMessage('');
   };
 
   return (
@@ -59,13 +75,37 @@ const StockForm = () => {
           <option value="IN">IN</option>
           <option value="OUT">OUT</option>
         </select>
-        <button
-          type="submit"
-          disabled={loading}
-          className="btn-submit"
-        >
-          {loading ? 'Saving...' : 'Add Stock'}
-        </button>
+        <input
+          type="text"
+          placeholder="Category (optional)"
+          value={category}
+          onChange={(e) => setCategory(e.target.value)}
+          className="input-field"
+        />
+        <input
+          type="text"
+          placeholder="Remarks (optional)"
+          value={remarks}
+          onChange={(e) => setRemarks(e.target.value)}
+          rows={3}
+          className="input-field textarea"
+        />
+        <div className="form-actions">
+          <button
+            type="submit"
+            disabled={loading}
+            className="submit-btn"
+          >
+            {loading ? 'Saving...' : 'Add Stock'}
+          </button>
+          <button
+            type="button"
+            onClick={handleClear}
+            className="clear-btn"
+          >
+            Clear Form
+          </button>
+        </div>
         {message && (
           <p className={`message ${message.includes('✅') ? 'success' : 'error'}`}>
             {message}

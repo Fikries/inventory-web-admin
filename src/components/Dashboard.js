@@ -8,8 +8,6 @@ import {
   doc,
   updateDoc
 } from 'firebase/firestore';
-import jsPDF from 'jspdf';
-import 'jspdf-autotable';
 
 const Dashboard = () => {
   const [data, setData] = useState([]);
@@ -22,6 +20,13 @@ const Dashboard = () => {
   const [filterYear, setFilterYear] = useState('');
   const [filterType, setFilterType] = useState('');
 
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
+
+  useEffect(() => {
+    fetchData(); // eslint-disable-next-line
+  }, []);
 
   const fetchData = async () => {
     const querySnapshot = await getDocs(collection(db, "inventory"));
@@ -33,23 +38,19 @@ const Dashboard = () => {
     });
 
     setData(items);
-    applyFilter(items, filterMonth, filterYear);
+    applyFilter(items, filterMonth, filterYear, filterType);
   };
 
-  useEffect(() => {
-    fetchData(); // eslint-disable-next-line
-  }, []);
-
   const applyFilter = (items, month, year, type) => {
-  const filtered = items.filter(entry => {
-    const date = entry.date.toDate();
-    const m = (date.getMonth() + 1).toString().padStart(2, '0');
-    const y = date.getFullYear().toString();
-    const matchMonth = !month || m === month;
-    const matchYear = !year || y === year;
-    const matchType = !type || entry.type === type;
-    return matchMonth && matchYear && matchType;
-  });
+    const filtered = items.filter(entry => {
+      const date = entry.date.toDate();
+      const m = (date.getMonth() + 1).toString().padStart(2, '0');
+      const y = date.getFullYear().toString();
+      const matchMonth = !month || m === month;
+      const matchYear = !year || y === year;
+      const matchType = !type || entry.type === type;
+      return matchMonth && matchYear && matchType;
+    });
 
     let inSum = 0;
     let outSum = 0;
@@ -60,6 +61,7 @@ const Dashboard = () => {
     setFilteredData(filtered);
     setInTotal(inSum);
     setOutTotal(outSum);
+    setCurrentPage(1); // Reset to page 1 when filters are applied
   };
 
   const handleDelete = async (id) => {
@@ -83,51 +85,21 @@ const Dashboard = () => {
   };
 
   const handleFilterChange = (month, year, type) => {
-  setFilterMonth(month);
-  setFilterYear(year);
-  setFilterType(type);
-  applyFilter(data, month, year, type);
-};
-
-  const generatePDF = async () => {
-  const doc = new jsPDF();
-
-  // Fetch image from public folder and convert to base64
-  const getImageBase64 = async (url) => {
-    const response = await fetch(url);
-    const blob = await response.blob();
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onloadend = () => resolve(reader.result);
-      reader.onerror = reject;
-      reader.readAsDataURL(blob);
-    });
+    setFilterMonth(month);
+    setFilterYear(year);
+    setFilterType(type);
+    applyFilter(data, month, year, type);
   };
 
-  const logoImg = await getImageBase64("/avant.jpg");
+  // Pagination logic
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredData.slice(indexOfFirstItem, indexOfLastItem);
 
-  // Now use it in jsPDF
-  doc.addImage(logoImg, 'JPEG', 14, 10, 30, 15);
-  doc.setFontSize(18);
-  doc.text("Inventory Report", 50, 20);
-  doc.setFontSize(12);
-  const tableColumn = ["Item", "Type", "Qty", "Date"];
-  const tableRows = filteredData.map(entry => [
-    entry.item,
-    entry.type,
-    entry.qty,
-    entry.date.toDate().toLocaleDateString()
-  ]);
-
-  doc.autoTable({
-    head: [tableColumn],
-    body: tableRows,
-    startY: 40
-  });
-
-  doc.save("inventory_report.pdf");
-};
-
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
 
   return (
     <div className="dashboard-container">
@@ -136,32 +108,43 @@ const Dashboard = () => {
       <div className="filters">
         <label>
           Month:
-          <select value={filterMonth} onChange={e => handleFilterChange(e.target.value, filterYear)}>
+          <select
+            value={filterMonth}
+            onChange={e => handleFilterChange(e.target.value, filterYear, filterType)}
+          >
             <option value="">All</option>
-            {Array.from({ length: 12 }, (_, i) =>
-              <option key={i} value={(i + 1).toString().padStart(2, '0')}>
-                {i + 1}
+            {[
+              'JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN',
+              'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'
+            ].map((monthName, index) => (
+              <option key={index} value={(index + 1).toString().padStart(2, '0')}>
+                {monthName}
               </option>
-            )}
+            ))}
           </select>
         </label>
+
         <label>
           Year:
           <input
             type="text"
             placeholder="e.g. 2025"
             value={filterYear}
-            onChange={e => handleFilterChange(filterMonth, e.target.value)}
+            onChange={e => handleFilterChange(filterMonth, e.target.value, filterType)}
           />
         </label>
+
         <label>
-    Type:
-    <select value={filterType} onChange={e => handleFilterChange(filterMonth, filterYear, e.target.value)}>
-      <option value="">All</option>
-      <option value="IN">IN</option>
-      <option value="OUT">OUT</option>
-    </select>
-          </label>
+          Type:
+          <select
+            value={filterType}
+            onChange={e => handleFilterChange(filterMonth, filterYear, e.target.value)}
+          >
+            <option value="">All</option>
+            <option value="IN">IN</option>
+            <option value="OUT">OUT</option>
+          </select>
+        </label>
       </div>
 
       <div className="totals">
@@ -175,10 +158,6 @@ const Dashboard = () => {
         </div>
       </div>
 
-      <button className="btn pdf-btn" onClick={generatePDF} disabled={filteredData.length === 0}>
-        Download PDF
-      </button>
-
       <div className="table-wrapper">
         <table className="inventory-table">
           <thead>
@@ -191,7 +170,7 @@ const Dashboard = () => {
             </tr>
           </thead>
           <tbody>
-            {filteredData.map(entry => (
+            {currentItems.map(entry => (
               <tr key={entry.id} className={editId === entry.id ? 'editing-row' : ''}>
                 {editId === entry.id ? (
                   <>
@@ -239,6 +218,19 @@ const Dashboard = () => {
             ))}
           </tbody>
         </table>
+
+        {/* Pagination Buttons */}
+        <div className="pagination">
+          {Array.from({ length: totalPages }, (_, i) => (
+            <button
+              key={i}
+              className={`page-btn ${currentPage === i + 1 ? 'active' : ''}`}
+              onClick={() => handlePageChange(i + 1)}
+            >
+              {i + 1}
+            </button>
+          ))}
+        </div>
       </div>
     </div>
   );

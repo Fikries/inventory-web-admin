@@ -44,3 +44,15 @@
   margin-top: 4rem;
   color: #555;
 }
+
+.btn-nav {
+  margin-right: 10px;
+  padding: 6px 12px;
+  background-color: #f0f0f0;
+  border: none;
+  cursor: pointer;
+}
+.btn-nav:hover {
+  background-color: #ddd;
+}
+
