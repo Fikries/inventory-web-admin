@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react'; 
 import { db } from '../firebase/config';
 import '../dashboard.css';
 import {
@@ -6,28 +6,28 @@ import {
   getDocs,
   deleteDoc,
   doc,
-  updateDoc
+  updateDoc,
+  onSnapshot,
+  query,
+  where
 } from 'firebase/firestore';
+
+const ITEMS_PER_PAGE = 5;
 
 const Dashboard = () => {
   const [data, setData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
-  const [inTotal, setInTotal] = useState(0);
-  const [outTotal, setOutTotal] = useState(0);
+  const [totalQty, setTotalQty] = useState(0);
+  const [totalThreshold, setTotalThreshold] = useState(0);
   const [editId, setEditId] = useState(null);
-  const [editData, setEditData] = useState({ item: '', qty: '', type: 'IN' });
+  const [editData, setEditData] = useState({ item: '', qty: '', threshold: 0 });
   const [filterMonth, setFilterMonth] = useState('');
   const [filterYear, setFilterYear] = useState('');
-  const [filterType, setFilterType] = useState('');
-
-  // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
+  const [alerts, setAlerts] = useState([]);
+  const alertedItemsRef = useRef(new Set());
 
-  useEffect(() => {
-    fetchData(); // eslint-disable-next-line
-  }, []);
-
+  // Fetch inventory data
   const fetchData = async () => {
     const querySnapshot = await getDocs(collection(db, "inventory"));
     const items = [];
@@ -38,30 +38,75 @@ const Dashboard = () => {
     });
 
     setData(items);
-    applyFilter(items, filterMonth, filterYear, filterType);
+    applyFilter(items, filterMonth, filterYear);
+    setCurrentPage(1);
   };
 
-  const applyFilter = (items, month, year, type) => {
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  // Real-time listener for low stock alerts
+  useEffect(() => {
+    const unsub = onSnapshot(
+      query(collection(db, "inventory"), where("lowStock", "==", true)),
+      (snapshot) => {
+        const lowStockItems = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setAlerts(lowStockItems);
+      }
+    );
+    return () => unsub();
+  }, []);
+
+  // Real-time listener for quantity reaching exactly 1 with popup alert
+  useEffect(() => {
+    const unsub = onSnapshot(collection(db, "inventory"), (snapshot) => {
+      snapshot.docChanges().forEach(change => {
+        if (change.type === 'modified' || change.type === 'added') {
+          const item = change.doc.data();
+          const id = change.doc.id;
+
+          if (item.qty === 1 && !alertedItemsRef.current.has(id)) {
+            alert(`⚠ Warning: Quantity of "${item.item}" has reached 1!`);
+            alertedItemsRef.current.add(id);
+          }
+          if (item.qty > 1 && alertedItemsRef.current.has(id)) {
+            alertedItemsRef.current.delete(id);
+          }
+        }
+      });
+    });
+
+    return () => unsub();
+  }, []);
+
+  const applyFilter = (items, month, year) => {
     const filtered = items.filter(entry => {
       const date = entry.date.toDate();
       const m = (date.getMonth() + 1).toString().padStart(2, '0');
       const y = date.getFullYear().toString();
       const matchMonth = !month || m === month;
       const matchYear = !year || y === year;
-      const matchType = !type || entry.type === type;
-      return matchMonth && matchYear && matchType;
+      return matchMonth && matchYear;
     });
 
-    let inSum = 0;
-    let outSum = 0;
+    let qtySum = 0;
+    let stockOutSum = 0; // Sum of units below threshold
+
     filtered.forEach(d => {
-      d.type === "IN" ? inSum += d.qty : outSum += d.qty;
+      const qty = d.qty || 0;
+      const threshold = d.threshold || 0;
+      qtySum += qty;
+
+      if (qty < threshold) {
+        stockOutSum += (threshold - qty);
+      }
     });
 
     setFilteredData(filtered);
-    setInTotal(inSum);
-    setOutTotal(outSum);
-    setCurrentPage(1); // Reset to page 1 when filters are applied
+    setTotalQty(qtySum);
+    setTotalThreshold(stockOutSum);
+    setCurrentPage(1);
   };
 
   const handleDelete = async (id) => {
@@ -71,46 +116,65 @@ const Dashboard = () => {
 
   const handleEditClick = (entry) => {
     setEditId(entry.id);
-    setEditData({ item: entry.item, qty: entry.qty, type: entry.type });
+    setEditData({
+      item: entry.item,
+      qty: entry.qty,
+      threshold: entry.threshold || 0
+    });
   };
 
   const handleUpdate = async () => {
+    const newQty = Number(editData.qty);
+    const thresholdVal = Number(editData.threshold) || 0;
+
     await updateDoc(doc(db, "inventory", editId), {
       item: editData.item,
-      qty: Number(editData.qty),
-      type: editData.type
+      qty: newQty,
+      threshold: thresholdVal,
+      lowStock: newQty <= thresholdVal
     });
+
     setEditId(null);
     fetchData();
   };
 
-  const handleFilterChange = (month, year, type) => {
+  const handleFilterChange = (month, year) => {
     setFilterMonth(month);
     setFilterYear(year);
-    setFilterType(type);
-    applyFilter(data, month, year, type);
+    applyFilter(data, month, year);
   };
 
   // Pagination logic
-  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = filteredData.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(filteredData.length / ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const paginatedData = filteredData.slice(startIndex, startIndex + ITEMS_PER_PAGE);
 
-  const handlePageChange = (pageNumber) => {
-    setCurrentPage(pageNumber);
+  const changePage = (pageNum) => {
+    if (pageNum < 1 || pageNum > totalPages) return;
+    setCurrentPage(pageNum);
   };
 
   return (
     <div className="dashboard-container">
       <h1>Dashboard</h1>
 
+      {/* Low Stock Alerts Panel */}
+      {alerts.length > 0 && (
+        <div className="alert-panel">
+          {alerts.map(alert => (
+            <div key={alert.id} className="alert-item">
+              ⚠ Low stock: {alert.item} ({alert.qty} left, threshold {alert.threshold})
+            </div>
+          ))}
+        </div>
+      )}
+
       <div className="filters">
         <label>
           Month:
           <select
             value={filterMonth}
-            onChange={e => handleFilterChange(e.target.value, filterYear, filterType)}
+            onChange={e => handleFilterChange(e.target.value, filterYear)}
           >
             <option value="">All</option>
             {[
@@ -130,31 +194,20 @@ const Dashboard = () => {
             type="text"
             placeholder="e.g. 2025"
             value={filterYear}
-            onChange={e => handleFilterChange(filterMonth, e.target.value, filterType)}
+            onChange={e => handleFilterChange(filterMonth, e.target.value)}
           />
-        </label>
-
-        <label>
-          Type:
-          <select
-            value={filterType}
-            onChange={e => handleFilterChange(filterMonth, filterYear, e.target.value)}
-          >
-            <option value="">All</option>
-            <option value="IN">IN</option>
-            <option value="OUT">OUT</option>
-          </select>
         </label>
       </div>
 
+      {/* Totals */}
       <div className="totals">
         <div className="total-box total-in">
-          <p>Total Stock IN</p>
-          <p className="total-number">{inTotal}</p>
+          <p>Total Quantity</p>
+          <p className="total-number">{totalQty}</p>
         </div>
         <div className="total-box total-out">
-          <p>Total Stock OUT</p>
-          <p className="total-number">{outTotal}</p>
+          <p>Item Needed</p>
+          <p className="total-number">{totalThreshold}</p>
         </div>
       </div>
 
@@ -163,14 +216,14 @@ const Dashboard = () => {
           <thead>
             <tr>
               <th>Item</th>
-              <th>Type</th>
-              <th>Qty</th>
-              <th>Date</th>
+              <th>Total Quantity</th>
+              <th>Stock Out</th>
+              <th>Date </th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            {currentItems.map(entry => (
+            {paginatedData.map(entry => (
               <tr key={entry.id} className={editId === entry.id ? 'editing-row' : ''}>
                 {editId === entry.id ? (
                   <>
@@ -181,19 +234,31 @@ const Dashboard = () => {
                       />
                     </td>
                     <td>
-                      <select
-                        value={editData.type}
-                        onChange={e => setEditData({ ...editData, type: e.target.value })}
-                      >
-                        <option value="IN">IN</option>
-                        <option value="OUT">OUT</option>
-                      </select>
-                    </td>
-                    <td>
                       <input
                         type="number"
                         value={editData.qty}
                         onChange={e => setEditData({ ...editData, qty: e.target.value })}
+                      />
+                    </td>
+                    <td>
+                      <input
+                        type="number"
+                        value={editData.threshold}
+                        onChange={e => {
+                          const newThreshold = Number(e.target.value);
+                          const oldThreshold = Number(editData.threshold) || 0;
+                          const oldQty = Number(editData.qty) || 0;
+
+                          const diff = newThreshold - oldThreshold;
+                          let newQty = oldQty - diff;
+                          if (newQty < 0) newQty = 0;
+
+                          setEditData({
+                            ...editData,
+                            threshold: newThreshold,
+                            qty: newQty
+                          });
+                        }}
                       />
                     </td>
                     <td>{entry.date.toDate().toLocaleDateString()}</td>
@@ -205,8 +270,8 @@ const Dashboard = () => {
                 ) : (
                   <>
                     <td>{entry.item}</td>
-                    <td className={entry.type === "IN" ? "type-in" : "type-out"}>{entry.type}</td>
                     <td>{entry.qty}</td>
+                    <td>{entry.threshold || 0}</td>
                     <td>{entry.date.toDate().toLocaleDateString()}</td>
                     <td>
                       <button className="btn edit" onClick={() => handleEditClick(entry)}>Edit</button>
@@ -218,20 +283,50 @@ const Dashboard = () => {
             ))}
           </tbody>
         </table>
-
-        {/* Pagination Buttons */}
-        <div className="pagination">
-          {Array.from({ length: totalPages }, (_, i) => (
-            <button
-              key={i}
-              className={`page-btn ${currentPage === i + 1 ? 'active' : ''}`}
-              onClick={() => handlePageChange(i + 1)}
-            >
-              {i + 1}
-            </button>
-          ))}
-        </div>
       </div>
+
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div style={{ marginTop: '20px', textAlign: 'center' }}>
+          <button
+            className="btn cancel"
+            onClick={() => changePage(currentPage - 1)}
+            disabled={currentPage === 1}
+            style={{ marginRight: '10px' }}
+          >
+            Prev
+          </button>
+
+          {[...Array(totalPages)].map((_, idx) => {
+            const pageNum = idx + 1;
+            return (
+              <button
+                key={pageNum}
+                className="btn"
+                onClick={() => changePage(pageNum)}
+                style={{
+                  marginRight: '8px',
+                  backgroundColor: currentPage === pageNum ? '#4299e1' : '#a0aec0',
+                  color: currentPage === pageNum ? 'white' : '#2d3748',
+                  fontWeight: currentPage === pageNum ? '700' : '600',
+                  cursor: 'pointer',
+                }}
+              >
+                {pageNum}
+              </button>
+            );
+          })}
+
+          <button
+            className="btn cancel"
+            onClick={() => changePage(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            style={{ marginLeft: '10px' }}
+          >
+            Next
+          </button>
+        </div>
+      )}
     </div>
   );
 };

@@ -1,42 +1,47 @@
+/* report.css - styled to match dashboard.css theme */
+
 .report-container {
-  max-width: 900px;
-  margin: 20px auto;
+  min-height: 100vh;
   padding: 20px;
-  background-color: #fafafa;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f0f4f8; /* light blue-gray */
   color: #333;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .report-container h2 {
-  margin-bottom: 20px;
-  font-weight: 600;
-  color: #222;
   text-align: center;
+  margin-bottom: 25px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
 }
 
-.report-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 10px;
+.filters {
+  display: flex;
+  justify-content: center;
+  gap: 25px;
+  margin-bottom: 30px;
+  flex-wrap: wrap;
 }
 
-.report-table th,
-.report-table td {
-  padding: 12px 15px;
-  border: 1px solid #ddd;
-  text-align: left;
-}
-
-.report-table th {
-  background-color: #007BFF;
-  color: white;
+.filters label {
   font-weight: 600;
+  font-size: 0.9rem;
 }
 
-.report-table tr:nth-child(even) {
-  background-color: #f9f9f9;
+.filters select,
+.filters input[type="text"] {
+  margin-left: 8px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: none;
+  font-size: 0.9rem;
+  outline: none;
+  transition: box-shadow 0.3s ease;
+}
+
+.filters select:focus,
+.filters input[type="text"]:focus {
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.7);
 }
 
 .report-buttons {
@@ -46,76 +51,99 @@
   gap: 10px;
 }
 
-.btn:hover {
-  background-color: #0056b3;
-}
-
-.message {
-  margin-top: 15px;
-  font-size: 0.9rem;
-  text-align: center;
-}
-
-.message.success {
-  color: green;
-}
-
-.message.error {
-  color: red;
-}
-
-.pdf-btn {
-  background-color: #007bff;
-  color: white;
-  padding: 8px 16px;
-  border: none;
-  margin: 15px 0;
-  cursor: pointer;
-  border-radius: 5px;
-}
-
-.btn.edit {
-  background-color: #f0ad4e;
-  color: white;
-}
-
-.btn.edit:hover {
-  background-color: #ec971f;
-}
-
-.btn.delete {
-  background-color: #d9534f;
-  color: white;
-}
-
-.btn.delete:hover {
-  background-color: #c9302c;
-}
-
-.btn.save {
-  background-color: #5cb85c;
-  color: white;
-}
-
-.btn.save:hover {
-  background-color: #4cae4c;
-}
-
-.btn.cancel {
-  background-color: #6c757d;
-  color: white;
-}
-
-.btn.cancel:hover {
-  background-color: #5a6268;
-}
-
+.pdf-btn,
 .excel-btn {
-  background-color: #007bff;
+  background-color: #4299e1;
   color: white;
   padding: 8px 16px;
   border: none;
-  margin: 15px 0;
   cursor: pointer;
-  border-radius: 5px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: background-color 0.3s ease;
+}
+
+.pdf-btn:hover,
+.excel-btn:hover {
+  background-color: #2b6cb0;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.25);
+}
+
+.report-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: white;
+  color: #333;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  margin-top: 20px;
+}
+
+.report-table thead tr {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.report-table th,
+.report-table td {
+  border: 1px solid #ccc;
+  padding: 10px;
+  text-align: left;
+}
+
+.report-table th {
+  font-weight: 700;
+  letter-spacing: 1px;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.4);
+}
+
+.report-table tbody tr {
+  background: rgba(0, 0, 0, 0.05);
+  transition: background-color 0.3s ease;
+}
+
+.report-table tbody tr:nth-child(even) {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.report-table tbody tr:hover {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+/* Pagination styling */
+.pagination {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+  gap: 8px;
+}
+
+.pagination button {
+  background-color: #4299e1;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.3s ease;
+}
+
+.pagination button:hover {
+  background-color: #2b6cb0;
+}
+
+.pagination button:disabled {
+  background-color: #a0aec0;
+  cursor: not-allowed;
+}
+
+.pagination .active-page {
+  background-color: #2b6cb0;
 }

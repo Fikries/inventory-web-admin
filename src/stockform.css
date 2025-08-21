@@ -1,17 +1,21 @@
+/* stockform.css - Styled to match dashboard.css theme */
+
 .stockform-container {
   max-width: 600px;
   margin: 2rem auto;
-  padding: 1rem 2rem;
-  background: #fff;
-  border-radius: 10px;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem 2rem;
+  background: #f0f4f8; /* light blue-gray to match dashboard background */
+  border-radius: 12px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.25);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .stockform-container h2 {
   text-align: center;
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
   font-size: 1.6rem;
   font-weight: 700;
+  letter-spacing: 1px;
   color: #333;
 }
 
@@ -23,10 +27,18 @@
 
 .input-field {
   padding: 0.6rem 1rem;
-  border: 1px solid #ccc;
   border-radius: 6px;
+  border: none;
   font-size: 1rem;
+  background-color: white;
   box-sizing: border-box;
+  outline: none;
+  transition: box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.input-field:focus {
+  box-shadow: 0 0 6px rgba(66, 153, 225, 0.6);
+  border-color: #4299e1;
 }
 
 .textarea {
@@ -40,33 +52,35 @@
 }
 
 .submit-btn {
-  background-color: #28a745; /* Bootstrap green */
+  background-color: #4299e1;
   color: white;
   border: none;
   padding: 0.6rem 1.2rem;
   font-size: 0.95rem;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
-  transition: 0.3s ease;
+  font-weight: 600;
+  transition: background-color 0.3s ease;
 }
 
 .submit-btn:hover {
-  background-color: #218838; /* Darker green on hover */
+  background-color: #2b6cb0;
 }
 
 .clear-btn {
-  background-color: #6c757d;
-  color: white;
+  background-color: #a0aec0;
+  color: #2d3748;
   border: none;
   padding: 0.6rem 1.2rem;
   font-size: 0.95rem;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
-  transition: 0.3s ease;
+  font-weight: 600;
+  transition: background-color 0.3s ease;
 }
 
 .clear-btn:hover {
-  background-color: #5a6268;
+  background-color: #718096;
 }
 
 .message {
@@ -76,9 +90,9 @@
 }
 
 .success {
-  color: #2d7a2d;
+  color: #1e8043; /* green success */
 }
 
 .error {
-  color: #a33a3a;
+  color: #cb0707; /* red error */
 }

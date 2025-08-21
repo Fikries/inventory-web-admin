@@ -1,0 +1,15 @@
+{
+  "name": "email-server",
+  "version": "1.0.0",
+  "description": "Mailgun email server for inventory alerts",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "mailgun-js": "^0.22.0",
+    "cors": "^2.8.5"
+  }
+}

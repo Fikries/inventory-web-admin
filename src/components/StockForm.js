@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { db } from '../firebase/config';
 import { collection, addDoc, Timestamp } from 'firebase/firestore';
 import '../stockform.css';
+import axios from 'axios';
 
 const StockForm = () => {
   const [item, setItem] = useState('');
@@ -25,10 +26,10 @@ const StockForm = () => {
         remarks,
         date: Timestamp.now()
       });
+      
       setMessage('✅ Stock added successfully!');
       setItem('');
       setQty('');
-      setType('IN');
       setCategory('');
       setRemarks('');
     } catch (error) {
@@ -41,7 +42,6 @@ const StockForm = () => {
   const handleClear = () => {
     setItem('');
     setQty('');
-    setType('IN');
     setCategory('');
     setRemarks('');
     setMessage('');
@@ -67,14 +67,6 @@ const StockForm = () => {
           required
           className="input-field"
         />
-        <select
-          value={type}
-          onChange={(e) => setType(e.target.value)}
-          className="input-field"
-        >
-          <option value="IN">IN</option>
-          <option value="OUT">OUT</option>
-        </select>
         <input
           type="text"
           placeholder="Category (optional)"

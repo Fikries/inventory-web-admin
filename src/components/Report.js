@@ -13,7 +13,10 @@ const Report = () => {
   const [filteredData, setFilteredData] = useState([]);
   const [filterMonth, setFilterMonth] = useState('');
   const [filterYear, setFilterYear] = useState('');
-  const [filterType, setFilterType] = useState('');
+
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
 
   useEffect(() => {
     fetchData(); // eslint-disable-next-line
@@ -23,28 +26,27 @@ const Report = () => {
     const snapshot = await getDocs(collection(db, 'inventory'));
     const items = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     setData(items);
-    applyFilter(items, filterMonth, filterYear, filterType);
+    applyFilter(items, filterMonth, filterYear);
   };
 
-  const applyFilter = (items, month, year, type) => {
+  const applyFilter = (items, month, year) => {
     const filtered = items.filter(entry => {
       const date = entry.date.toDate();
       const m = (date.getMonth() + 1).toString().padStart(2, '0');
       const y = date.getFullYear().toString();
       const matchMonth = !month || m === month;
       const matchYear = !year || y === year;
-      const matchType = !type || entry.type === type;
-      return matchMonth && matchYear && matchType;
+      return matchMonth && matchYear;
     });
 
     setFilteredData(filtered);
+    setCurrentPage(1); // reset to page 1 after filtering
   };
 
-  const handleFilterChange = (month, year, type) => {
+  const handleFilterChange = (month, year) => {
     setFilterMonth(month);
     setFilterYear(year);
-    setFilterType(type);
-    applyFilter(data, month, year, type);
+    applyFilter(data, month, year);
   };
 
   const generatePDF = async () => {
@@ -64,13 +66,13 @@ const Report = () => {
 
     const tableData = filteredData.map(d => [
       d.item,
-      d.type,
       d.qty,
+      d.threshold || 0,
       d.date.toDate().toLocaleDateString()
     ]);
 
     doc.autoTable({
-      head: [["Item", "Type", "Qty", "Date"]],
+      head: [["Item", "Total Quantity", "Stock Out", "Date"]],
       body: tableData,
       startY: 40,
     });
@@ -84,11 +86,11 @@ const Report = () => {
       ["Avant Sdn Bhd"],
       ["Inventory Report"],
       [],
-      ["Item", "Type", "Qty", "Date"],
+      ["Item", "Total Quantity", "Stock Out", "Date"],
       ...filteredData.map(d => [
         d.item,
-        d.type,
         d.qty,
+        d.threshold || 0,
         d.date.toDate().toLocaleDateString()
       ])
     ];
@@ -102,6 +104,14 @@ const Report = () => {
 
   const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
 
+  // Pagination logic
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredData.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
   return (
     <div className="report-container">
       <h2>Inventory Report</h2>
@@ -109,7 +119,7 @@ const Report = () => {
       <div className="filters">
         <label>
           Month:
-          <select value={filterMonth} onChange={e => handleFilterChange(e.target.value, filterYear, filterType)}>
+          <select value={filterMonth} onChange={e => handleFilterChange(e.target.value, filterYear)}>
             <option value="" style={{ fontWeight: 'bold' }}>All</option>
             {months.map((month, i) => (
               <option key={i} value={(i + 1).toString().padStart(2, '0')}>
@@ -123,46 +133,58 @@ const Report = () => {
           <input
             type="text"
             value={filterYear}
-            onChange={e => handleFilterChange(filterMonth, e.target.value, filterType)}
+            onChange={e => handleFilterChange(filterMonth, e.target.value)}
             placeholder="e.g. 2025"
           />
-        </label>
-        <label>
-          Type:
-          <select value={filterType} onChange={e => handleFilterChange(filterMonth, filterYear, e.target.value)}>
-            <option value="">All</option>
-            <option value="IN">IN</option>
-            <option value="OUT">OUT</option>
-          </select>
         </label>
       </div>
 
       <div className="report-buttons">
-      <button className="pdf-btn" onClick={generatePDF} disabled={filteredData.length === 0}>Download PDF</button>
-      <button className="excel-btn" onClick={generateExcel} disabled={filteredData.length === 0}>Download Excel</button>
+        <button className="pdf-btn" onClick={generatePDF} disabled={filteredData.length === 0}>Download PDF</button>
+        <button className="excel-btn" onClick={generateExcel} disabled={filteredData.length === 0}>Download Excel</button>
       </div>
-  
 
       <table className="report-table">
         <thead>
           <tr>
             <th>Item</th>
-            <th>Type</th>
-            <th>Qty</th>
+            <th>Total Quantity</th>
+            <th>Stock Out</th>
             <th>Date</th>
           </tr>
         </thead>
         <tbody>
-          {filteredData.map(entry => (
+          {currentItems.map(entry => (
             <tr key={entry.id}>
               <td>{entry.item}</td>
-              <td>{entry.type}</td>
               <td>{entry.qty}</td>
+              <td>{entry.threshold}</td>
               <td>{entry.date.toDate().toLocaleDateString()}</td>
             </tr>
           ))}
         </tbody>
       </table>
+
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div className="pagination">
+          <button onClick={() => paginate(currentPage - 1)} disabled={currentPage === 1}>
+            Prev
+          </button>
+          {[...Array(totalPages)].map((_, index) => (
+            <button
+              key={index}
+              onClick={() => paginate(index + 1)}
+              className={currentPage === index + 1 ? 'active-page' : ''}
+            >
+              {index + 1}
+            </button>
+          ))}
+          <button onClick={() => paginate(currentPage + 1)} disabled={currentPage === totalPages}>
+            Next
+          </button>
+        </div>
+      )}
     </div>
   );
 };
